@@ -2,66 +2,40 @@ name: Auto-Share Medium → LinkedIn
 
 on:
   schedule:
-    - cron: '*/30 * * * *'    # every 30 minutes
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 permissions:
-  contents: write           # allow committing back
+  contents: write   # allow pushing last.txt back
 
 jobs:
   share:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Restore last.txt from cache
-      - name: Restore last.txt from cache
-        uses: actions/cache@v3
-        with:
-          path: last.txt
-          key: share-last-txt
-
-      # 2. Checkout code
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           persist-credentials: true
 
-      # 3. Setup Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      # 4. Install deps
       - name: Install dependencies
-        run: pip install feedparser requests markovify
+        run: pip install feedparser requests beautifulsoup4
 
-      # 5. Run share + rebuild model
-      - name: Share & rebuild
+      - name: Run share.py
         env:
           MEDIUM_RSS_URL:        ${{ secrets.MEDIUM_RSS_URL }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
           LINKEDIN_ACTOR_URN:    ${{ secrets.LINKEDIN_ACTOR_URN }}
-        run: |
-          python share.py
-          python build_model.py
+        run: python share.py
 
-      # 6. Save last.txt to cache
-      - name: Save last.txt to cache
-        uses: actions/cache@v3
-        with:
-          path: last.txt
-          key: share-last-txt
-
-      # 7. Commit updated intros.txt & model.json
-      - name: Commit new intros & model
+      - name: Commit last.txt
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain intros.txt model.json)" ]; then
-            git add intros.txt model.json
-            git commit -m "chore: append new intro & rebuild model"
-            git push
-          else
-            echo "No changes to intros.txt or model.json"
-          fi
+          git add last.txt
+          git commit -m "chore: update last shared URL" || echo "No changes"
+          git push
