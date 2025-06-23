@@ -1,29 +1,47 @@
-name: Auto-Share Medium Agent
+name: Auto-Share Medium to LinkedIn
 
 on:
   schedule:
-    - cron: '0 */6 * * *'   # At minute 0 past every 6th hour
-  workflow_dispatch:         # Allow manual triggers
+    - cron: '0 */6 * * *'      # every 6 hours at minute 0
+  workflow_dispatch:           # also allow manual run
 
 jobs:
   share:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Set up Python
+    steps:
+      # 1. Restore last.txt from cache (if it exists)
+      - name: Restore last.txt from cache
+        uses: actions/cache@v3
+        with:
+          path: last.txt
+          key: last-txt-cache
+
+      # 2. Check out your code
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # 3. Set up Python
+      - name: Set up Python 3.x
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
+      # 4. Install dependencies
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+        run: pip install feedparser requests
 
-      - name: Run share agent
+      # 5. Run the sharing script
+      - name: Run share.py
         env:
-          MEDIUM_RSS_URL: ${{ secrets.MEDIUM_RSS_URL }}
+          MEDIUM_RSS_URL:        ${{ secrets.MEDIUM_RSS_URL }}
           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
-          LINKEDIN_ACTOR_URN: ${{ secrets.LINKEDIN_ACTOR_URN }}
+          LINKEDIN_ACTOR_URN:    ${{ secrets.LINKEDIN_ACTOR_URN }}
         run: python share.py
+
+      # 6. Save last.txt back into cache
+      - name: Save last.txt to cache
+        uses: actions/cache@v3
+        with:
+          path: last.txt
+          key: last-txt-cache
