@@ -1,0 +1,30 @@
+name: Auto-Share Medium Agent
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # At minute 0 past every 6th hour
+  workflow_dispatch:         # Allow manual triggers
+
+jobs:
+  share:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run share agent
+        env:
+          MEDIUM_RSS_URL: ${{ secrets.MEDIUM_RSS_URL }}
+          TWITTER_BEARER_TOKEN: ${{ secrets.TWITTER_BEARER_TOKEN }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_ACTOR_URN: ${{ secrets.LINKEDIN_ACTOR_URN }}
+        run: python share.py
