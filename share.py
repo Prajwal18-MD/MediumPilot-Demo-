@@ -27,9 +27,9 @@ def get_latest():
     text    = BeautifulSoup(html, "html.parser").get_text()
     excerpt = text.strip().split("\n")[0][:200]  # first line, 200 chars
 
-    # up to 3 hashtags from <category>
+    # up to 6 hashtags from <category>
     tags     = [t.term for t in entry.get("tags", [])]
-    hashtags = ["#" + t.strip().title().replace(" ", "") for t in tags[:3]]
+    hashtags = ["#" + t.strip().title().replace(" ", "") for t in tags[:6]]
 
     # cover-image from <figure><img>
     raw_html    = entry.get("content", [{}])[0].get("value", "")
