@@ -1,41 +1,41 @@
-name: Auto-Share Medium → LinkedIn
+# name: Auto-Share Medium → LinkedIn
 
-on:
-  schedule:
-    - cron: '*/30 * * * *'
-  workflow_dispatch:
+# on:
+#   schedule:
+#     - cron: '*/30 * * * *'
+#   workflow_dispatch:
 
-permissions:
-  contents: write   # allow pushing last.txt back
+# permissions:
+#   contents: write   # allow pushing last.txt back
 
-jobs:
-  share:
-    runs-on: ubuntu-latest
+# jobs:
+#   share:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: true
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           persist-credentials: true
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+#       - name: Set up Python
+#         uses: actions/setup-python@v4
+#         with:
+#           python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install feedparser requests beautifulsoup4
+#       - name: Install dependencies
+#         run: pip install feedparser requests beautifulsoup4
 
-      - name: Run share.py
-        env:
-          MEDIUM_RSS_URL:        ${{ secrets.MEDIUM_RSS_URL }}
-          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
-          LINKEDIN_ACTOR_URN:    ${{ secrets.LINKEDIN_ACTOR_URN }}
-        run: python share.py
+#       - name: Run share.py
+#         env:
+#           MEDIUM_RSS_URL:        ${{ secrets.MEDIUM_RSS_URL }}
+#           LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+#           LINKEDIN_ACTOR_URN:    ${{ secrets.LINKEDIN_ACTOR_URN }}
+#         run: python share.py
 
-      - name: Commit last.txt
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add last.txt
-          git commit -m "chore: update last shared URL" || echo "No changes"
-          git push
+#       - name: Commit last.txt
+#         run: |
+#           git config user.name "github-actions[bot]"
+#           git config user.email "github-actions[bot]@users.noreply.github.com"
+#           git add last.txt
+#           git commit -m "chore: update last shared URL" || echo "No changes"
+#           git push
